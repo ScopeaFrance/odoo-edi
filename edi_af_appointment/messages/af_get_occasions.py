@@ -57,3 +57,80 @@ class edi_message(models.Model):
         else:
             super(edi_message, self).pack()
 
+
+class edi_envelope(models.Model):
+    _name = 'edi.envelope'
+    _inherit = ['mail.thread']
+    _description = 'EDI Envelope'
+
+    @api.one
+    def _split(self):
+        if self.route_type == 'plain':
+            msg = self.env['edi.message'].create({
+                'name': 'plain',
+                'envelope_id': self.id,
+                'body': self.body,
+                'route_type': self.route_type,
+                'sender': self.sender,
+                'recipient': self.recipient,
+                #~ 'consignor_id': sender.id,
+                #~ 'consignee_id': recipient.id,
+            })
+            msg.unpack()
+        self.envelope_opened()
+
+
+    @api.one
+    def fold(self):
+        #for m in self.env['edi.message'].search([('envelope_id','=',None),('route_id','=',route.id)]):
+        #    m.envelope_id = self.id
+        try:
+            if not self.state == "progress" or self.body:
+                raise TypeError('Cant fold an already folded envelope')
+            res = self._fold(self.route_id)
+        except ValueError as e:
+            id = self.env['mail.message'].create({
+                    'body': _("Route %s type %s Error %s\n" % (self.route_id.name,self.route_type,e)),
+                    'subject': "ValueError",
+                    'author_id': self.env['res.users'].browse(self.env.uid).partner_id.id,
+                    'res_id': self.id,
+                    'model': self._name,
+                    'type': 'notification',})
+            self.state = "canceled"
+            _logger.error('edi.envelope.fold(): EDI ValueError Route %s type %s #%s Error %s ' % (self.route_id.name,self.route_type,self.route_id.run_sequence,e))
+            #raise Warning('EDI ValueError in split %s (%s) %s' % (e,id,d))
+        except TypeError as e:
+            self.env['mail.message'].create({
+                    'body': _("Route %s type %s #%s Error %s\n" % (self.route_id.name,self.route_type,self.route_id.run_sequence,e)),
+                    'subject': "TypeError",
+                    'author_id': self.env['res.users'].browse(self.env.uid).partner_id.id,
+                    'res_id': self.id,
+                    'model': self._name,
+                    'type': 'notification',})
+            self.state = "canceled"
+            _logger.error('edi.envelope.fold(): EDI TypeError Route %s type %s #%s Error %s ' % (self.route_id.name,self.route_type,self.route_id.run_sequence,e))
+        except IOError as e:
+            self.env['mail.message'].create({
+                    'body': _("Route %s type %s Error #%s %s\n" % (self.route_id.name,self.route_type,self.route_id.run_sequence,e)),
+                    'subject': "IOError",
+                    'author_id': self.env['res.users'].browse(self.env.uid).partner_id.id,
+                    'res_id': self.id,
+                    'model': self._name,
+                    'type': 'notification',})
+            self.state = "canceled"
+            _logger.error('edi.envelope.fold(): EDI IOError Route %s type %s Error %s ' % (self.route_id.name,self.route_type,e))
+            #raise Warning('EDI IOError in split %s' % e)
+        else:
+            self.env['mail.message'].create({
+                    'body': _("Route %s type %s #%s %s messages created\n" % (self.route_id.name,self.route_type,self.route_id.run_sequence,'ok')),
+                    'subject': "Success",
+                    'author_id': self.env['res.users'].browse(self.env.uid).partner_id.id,
+                    'res_id': self.id,
+                    'model': self._name,
+                    'type': 'notification',})
+
+    @api.multi
+    def _fold(self,route): # Folds messages in an envelope
+        if route.route_type == 'plain':
+            self.body = base64.b64encode(''.join([base64.b64decode(m.body) for m in self.edi_message_ids]))
+        return self

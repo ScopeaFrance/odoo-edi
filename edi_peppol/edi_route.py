@@ -21,7 +21,7 @@
 from odoo import models, fields, api, _
 import base64
 from datetime import datetime
-#https://www.stylusstudio.com/edifact/frames.htm
+
 
 import logging
 _logger = logging.getLogger(__name__)

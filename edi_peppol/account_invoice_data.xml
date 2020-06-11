@@ -9,12 +9,41 @@
     r._edi_message_create('INVOIC')
         </field>
     </record>
+    
+    
     <record id="edi_message_type_bis4a" model="edi.message.type">
         <field name="name">Bis4a</field>
     </record>
     <record id="edi_message_type_bis5a" model="edi.message.type">
         <field name="name">Bis5a</field>
     </record>
+    
+<!-- Invoice CL -->
+    <record id="edi_message_type_json_invoice_create" model="edi.message.type">
+        <field name="name">Json Invoice Create</field>
+    </record>
+    <record id="edi_message_type_json_invoice_list" model="edi.message.type">
+        <field name="name">Json Invoice List</field>
+    </record>
+    
+    <!-- Customer CRUDL -->
+    <record id="edi_message_type_json_customer_create" model="edi.message.type">
+        <field name="name">Json Customer Create</field>
+    </record>
+    <record id="edi_message_type_json_customer_read" model="edi.message.type">
+        <field name="name">Json Customer Read</field>
+    </record>
+    <record id="edi_message_type_json_customer_update" model="edi.message.type">
+        <field name="name">Json Customer Update</field>
+    </record>
+    <record id="edi_message_type_json_customer_delete" model="edi.message.type">
+        <field name="name">Json Customer Delete</field>
+    </record>
+    <record id="edi_message_type_json_customer_list" model="edi.message.type">
+        <field name="name">Json Customer List</field>
+    </record>
+
+
 
 
 </data>
