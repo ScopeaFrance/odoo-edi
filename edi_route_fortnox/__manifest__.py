@@ -20,13 +20,13 @@
 ##############################################################################
 
 {
-    'name': 'EDI Routes ECB',
+    'name': 'EDI Routes Fortnox',
     'version': '0.1',
     'category': 'edi',
     'summary': 'Routes for European Central Bank',
     'licence': 'AGPL-3',
     'description': """
-Add routes for EDI using European Central Bank.
+Add routes for Fortnox using EDI.
 
 """,
     'author': 'Vertel AB',
@@ -41,6 +41,5 @@ Add routes for EDI using European Central Bank.
     ],
     'application': False,
     'installable': True,
- #   'demo': ['calendar_ics_demo.xml',],
 }
 # vim:expandtab:smartindent:tabstop=4s:softtabstop=4:shiftwidth=4:
